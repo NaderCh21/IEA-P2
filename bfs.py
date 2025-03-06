@@ -4,6 +4,7 @@ from collections import deque
 def bfs_path(start, goal, grid):
     """
     Finds the shortest path from start to goal using BFS.
+    The goal cell is allowed even if it is not empty.
     :param start: Tuple (row, col) for the starting position.
     :param goal: Tuple (row, col) for the goal position.
     :param grid: 2D list representing the grid.
@@ -28,7 +29,8 @@ def bfs_path(start, goal, grid):
         for dx, dy in directions:
             nx, ny = current[0] + dx, current[1] + dy
             if 0 <= nx < rows and 0 <= ny < cols and (nx, ny) not in visited:
-                if grid[nx][ny] == 0:  # Only move through empty cells
+                # Allow moving into the goal cell even if it is not 0
+                if grid[nx][ny] == 0 or (nx, ny) == goal:
                     queue.append((nx, ny))
                     visited.add((nx, ny))
                     parent[(nx, ny)] = current
