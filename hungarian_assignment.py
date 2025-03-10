@@ -4,87 +4,91 @@ from astar import astar_path
 
 def optimal_assignment(grid, target_shape):
     """
-    Builds an optimal assignment of current cells -> target_shape using BFS distances as costs.
+    Builds a cost matrix from *all* live cells to *all* target positions.
+    Never fails: if Hungarian is infeasible, we remove the worst row/col and retry until success or empty.
     """
 
-    # Step A: Gather current cells
-    current_cells = [(r, c) for r in range(len(grid)) for c in range(len(grid[r])) if grid[r][c] == 1]
-    if not current_cells:
+    # 1) Gather all live cells
+    cells = [(r, c) for r in range(len(grid)) for c in range(len(grid[r])) if grid[r][c] == 1]
+    if not cells:
         return []
 
-    # Build cost matrix: rows = cells, columns = target positions
-    cost_rows, filtered_cells = [], []
-    for cell in current_cells:
-        row_costs = [len(astar_path(cell, tgt, grid)) if astar_path(cell, tgt, grid) else float('inf') for tgt in target_shape]
-        if not all(cost == float('inf') for cost in row_costs):
-            cost_rows.append(row_costs)
-            filtered_cells.append(cell)
+    # 2) Build cost matrix
+    cost_rows = []
+    for cell in cells:
+        row = []
+        for tgt in target_shape:
+            path = astar_path(cell, tgt, grid)
+            row.append(len(path) if path else float('inf'))
+        cost_rows.append(row)
 
-    if not cost_rows:
-        return []
     cost_matrix = np.array(cost_rows, dtype=float)
 
-    # Step B: Remove columns that are all inf
-    valid_cols = np.where(~np.all(np.isinf(cost_matrix), axis=0))[0]
-    if len(valid_cols) == 0:
-        return []
-    cost_matrix = cost_matrix[:, valid_cols]
-    filtered_targets = [target_shape[i] for i in valid_cols]
+    # 3) Remove columns that are fully inf (unreachable targets *this* iteration)
+    keep_cols = np.where(~np.all(np.isinf(cost_matrix), axis=0))[0]
+    cost_matrix = cost_matrix[:, keep_cols]
+    valid_targets = [target_shape[i] for i in keep_cols]
+
+    # 4) Remove rows that are fully inf (cells that can't reach any target *this* iteration)
+    keep_rows = np.where(~np.all(np.isinf(cost_matrix), axis=1))[0]
+    cost_matrix = cost_matrix[keep_rows, :]
+    valid_cells = [cells[i] for i in keep_rows]
 
     if cost_matrix.size == 0:
         return []
 
-    # Step C: Remove rows that are now all inf
-    valid_rows = np.where(~np.all(np.isinf(cost_matrix), axis=1))[0]
-    if len(valid_rows) == 0:
-        return []
-    cost_matrix = cost_matrix[valid_rows, :]
-    final_cells = [filtered_cells[i] for i in valid_rows]
+    # 5) Force a square matrix by trimming the dimension that is bigger
+    def trim_to_square(cm, vc, vt):
+        while True:
+            rcount, ccount = cm.shape
+            if rcount == 0 or ccount == 0:
+                return cm, vc, vt
+            if rcount == ccount:
+                return cm, vc, vt
+            if rcount > ccount:
+                # remove row with worst min cost
+                row_min = np.min(cm, axis=1)
+                worst_idx = np.argmax(row_min)
+                cm = np.delete(cm, worst_idx, axis=0)
+                del vc[worst_idx]
+            else:
+                # remove col with worst min cost
+                col_min = np.min(cm, axis=0)
+                worst_idx = np.argmax(col_min)
+                cm = np.delete(cm, worst_idx, axis=1)
+                del vt[worst_idx]
 
+    cost_matrix, valid_cells, valid_targets = trim_to_square(cost_matrix, valid_cells, valid_targets)
     if cost_matrix.size == 0:
         return []
 
-    # Step D: Symmetrical partial coverage
-    rows, cols = cost_matrix.shape
-    if rows > cols:
-        keep_rows = np.argsort(np.min(cost_matrix, axis=1))[:cols]
-        cost_matrix = cost_matrix[keep_rows, :]
-        final_cells = [final_cells[i] for i in keep_rows]
-    elif cols > rows:
-        keep_cols = np.argsort(np.min(cost_matrix, axis=0))[:rows]
-        cost_matrix = cost_matrix[:, keep_cols]
-        filtered_targets = [filtered_targets[i] for i in keep_cols]
-
-    if cost_matrix.size == 0:
-        return []
-
-    # Step E: **Final check and removal of any all-inf rows/columns**
-    while np.any(np.all(np.isinf(cost_matrix), axis=0)) or np.any(np.all(np.isinf(cost_matrix), axis=1)):
-        # Remove all-inf rows
-        valid_rows = np.where(~np.all(np.isinf(cost_matrix), axis=1))[0]
-        if len(valid_rows) == 0:
-            return []
-        cost_matrix = cost_matrix[valid_rows, :]
-        final_cells = [final_cells[i] for i in valid_rows]
-
-        # Remove all-inf columns
-        valid_cols = np.where(~np.all(np.isinf(cost_matrix), axis=0))[0]
-        if len(valid_cols) == 0:
-            return []
-        cost_matrix = cost_matrix[:, valid_cols]
-        filtered_targets = [filtered_targets[i] for i in valid_cols]
-
-        if cost_matrix.size == 0:
-            return []
-
-    # Debugging: Print final cost matrix before Hungarian
-    print("Final Cost Matrix (After Fixes):")
-    print(cost_matrix)
-
-    # Step F: Solve with Hungarian
-    row_indices, col_indices = linear_sum_assignment(cost_matrix)
-
-    # Step G: Build assignments
-    assignments = [(final_cells[r_idx], filtered_targets[c_idx]) for r_idx, c_idx in zip(row_indices, col_indices) if cost_matrix[r_idx, c_idx] < float('inf')]
+    # 6) Repeatedly try linear_sum_assignment, removing the single worst row/col if it fails
+    assignments = []
+    while True:
+        try:
+            row_idx, col_idx = linear_sum_assignment(cost_matrix)
+            for r, c in zip(row_idx, col_idx):
+                if cost_matrix[r, c] < float('inf'):
+                    assignments.append((valid_cells[r], valid_targets[c]))
+            break
+        except ValueError:
+            rcount, ccount = cost_matrix.shape
+            if rcount == 0 or ccount == 0:
+                break
+            # remove the worst row or col by max min cost
+            row_min = np.min(cost_matrix, axis=1)
+            col_min = np.min(cost_matrix, axis=0)
+            worst_row = np.argmax(row_min)
+            worst_col = np.argmax(col_min)
+            if row_min[worst_row] >= col_min[worst_col]:
+                # remove row
+                cost_matrix = np.delete(cost_matrix, worst_row, axis=0)
+                del valid_cells[worst_row]
+            else:
+                # remove col
+                cost_matrix = np.delete(cost_matrix, worst_col, axis=1)
+                del valid_targets[worst_col]
+            if cost_matrix.size == 0:
+                break
 
     return assignments
