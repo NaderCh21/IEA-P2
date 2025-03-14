@@ -2,10 +2,12 @@
 import pygame
 import sys
 from constants import WINDOW_SIZE, FPS, CELL_SIZE
-from grid import initialize_grid
+from grid import initialize_grid , add_obstacles
 from draw import draw_grid
 from bfs import bfs_path
 from shape_selector import select_target_shape
+
+HEADER_HEIGHT = 60  
 
 def move_single_element(grid, start, target, screen):
     """Moves a single element from start to target using BFS."""
@@ -38,17 +40,18 @@ def move_elements_to_shape(grid, target_shape, screen):
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE))
+    screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE + HEADER_HEIGHT))
     pygame.display.set_caption("Programmable Matter Grid")
     grid = initialize_grid()
 
-    # Let the user define the target shape interactively
-    target_shape = select_target_shape(grid, screen, CELL_SIZE)
-    
-    # Move elements sequentially to form the selected shape
-    move_elements_to_shape(grid, target_shape, screen)
-
     while True:
+        # Let the user define the target shape interactively
+        target_shape = select_target_shape(grid, screen, CELL_SIZE)
+        # Adding obstacles 
+        add_obstacles(grid, target_shape, obstacle_prob = 0.1)
+        
+        # Move elements sequentially to form the selected shape
+        move_elements_to_shape(grid, target_shape, screen)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()

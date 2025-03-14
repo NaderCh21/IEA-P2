@@ -9,6 +9,8 @@ from astar import astar_path as bfs_path
 from hungarian_assignment import optimal_assignment
 from shape_selector import select_target_shape
 
+HEADER_HEIGHT = 60  
+
 def move_single_element(grid, start, target, screen):
     """Moves a single element from start to target using BFS."""
     path = bfs_path(start, target, grid)
@@ -37,21 +39,23 @@ def move_elements_to_shape(grid, target_shape, screen):
         if grid[target[0]][target[1]] != 1:
             grid[target[0]][target[1]] = 1
             draw_grid(screen, grid)
-            pygame.time.wait(300)
+            pygame.time.wait(50)
+            pygame.event.pump()
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE))
+    screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE + HEADER_HEIGHT))
     pygame.display.set_caption("Programmable Matter Grid - Optimal Assignment")
     grid = initialize_grid()
     
-    # Let the user define the target shape interactively
-    target_shape = select_target_shape(grid, screen, CELL_SIZE)
-    
-    # Move elements optimally to form the target shape
-    move_elements_to_shape(grid, target_shape, screen)
+
     
     while True:
+                # Let the user define the target shape interactively
+        target_shape = select_target_shape(grid, screen, CELL_SIZE)
+        
+        # Move elements optimally to form the target shape
+        move_elements_to_shape(grid, target_shape, screen)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()

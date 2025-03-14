@@ -24,9 +24,12 @@ INITIAL_STATE = [(8, i) for i in range(10)] + [(9, i) for i in range(10)]
 
 HEADER_HEIGHT = 60  
 DROPDOWN_X, DROPDOWN_Y, DROPDOWN_WIDTH = 20, 15, 120  
-BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT = 160, 15, 80, 30  
+BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT = 160, 15, 80, 30 
 
-def draw_ui(screen, selected_shape, dropdown_open):
+# Added for cell selection limit 
+MAX_CUSTOM_CELLS = 20 
+
+def draw_ui(screen, selected_shape, dropdown_open , limit_reached = False):
     """Draws the dropdown and reset button in the header."""
     font = pygame.font.Font(None, 28)
 
@@ -48,7 +51,13 @@ def draw_ui(screen, selected_shape, dropdown_open):
     pygame.draw.rect(screen, (255, 100, 100), (BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT))
     pygame.draw.rect(screen, (0, 0, 0), (BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT), 2)
     reset_text = font.render("Reset", True, (255, 255, 255))
+
     screen.blit(reset_text, (BUTTON_X + 15, BUTTON_Y + 5))
+    # Draw error message if limit reached when selecting pixels in custom mode 
+    if limit_reached:
+        error_font = pygame.font.Font(None, 24)
+        error_text = error_font.render("Max 20 cells allowed!", True, (255, 0, 0))
+        screen.blit(error_text, (DROPDOWN_X, DROPDOWN_Y + 40))
 
 def select_target_shape(grid, screen, cell_size):
     """Handles shape selection and reset functionality."""
@@ -99,12 +108,18 @@ def select_target_shape(grid, screen, cell_size):
                             event_occurred = True
 
             # Custom shape selection
+
             if event.type == pygame.MOUSEBUTTONDOWN and selected_shape == "Custom":
                 row, col = (event.pos[1] - HEADER_HEIGHT) // cell_size, event.pos[0] // cell_size
                 if 0 <= row < len(grid) and 0 <= col < len(grid[0]):
                     if (row, col) not in target_shape:
-                        target_shape.append((row, col))
-                        event_occurred = True
+                          if len(target_shape) < MAX_CUSTOM_CELLS:
+                                target_shape.append((row, col))
+                                event_occurred = True
+                                limit_reached = False
+                          else:
+                            limit_reached = True
+                            event_occurred = True
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN and target_shape:
                 return target_shape  

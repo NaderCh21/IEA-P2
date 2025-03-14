@@ -10,3 +10,6 @@ FPS = 60
 WHITE = (255, 255, 255)
 ORANGE = (255, 165, 0)
 BLACK = (0, 0, 0)
+
+# Added Red for the Obstacles 
+RED = (255, 0, 0) 
