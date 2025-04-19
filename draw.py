@@ -3,14 +3,10 @@ from constants import CELL_SIZE, WHITE, ORANGE, BLACK, GRID_SIZE , RED
 
 
 
-HEADER_HEIGHT = 60  # Define a fixed header height for the UI
+HEADER_HEIGHT = 60 
 
 def draw_grid(screen, grid):
-    """
-    Draws the grid on the screen, shifting it down to make space for the header.
-    :param screen: Pygame screen object.
-    :param grid: 2D list representing the grid.
-    """
+
     screen.fill(WHITE)
     
     for row in range(GRID_SIZE):

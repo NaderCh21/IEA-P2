@@ -20,7 +20,7 @@ def move_single_element(grid, start, target, screen):
         grid[next_pos[0]][next_pos[1]] = 1
         start = next_pos
         draw_grid(screen, grid)
-        pygame.time.wait(300)
+        pygame.time.wait(100)
 
 def move_elements_to_shape(grid, target_shape, screen):
     """Moves multiple elements sequentially to form the target shape."""

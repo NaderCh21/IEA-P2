@@ -5,18 +5,10 @@ from astar import astar_path
 from hungarian_assignment import optimal_assignment
 
 def move_elements_in_parallel(grid, target_shape, screen):
-    """
-    Moves cells in parallel using repeated Hungarian assignments.
-    
-    Rules:
-    1) No cells disappear (collision logic with 2-swap detection).
-    2) Cells on target positions can still move if beneficial.
-    3) Stops after 10 consecutive iterations with no movement.
-    4) If some cells remain unassigned, performs repeated single-step nudges.
-    """
 
+    steps = 0
     rows, cols = len(grid), len(grid[0])
-    max_stuck_iterations = 10  # Limit on stalled movement
+    max_stuck_iterations = 10  
     stuck_count = 0
 
     def shape_formed():
@@ -89,6 +81,8 @@ def move_elements_in_parallel(grid, target_shape, screen):
             grid[oldpos[0]][oldpos[1]] = 0
         for oldpos, newpos in final_moves.items():
             grid[newpos[0]][newpos[1]] = 1
+        
+        steps += 1 
 
         # Update the display
         draw_grid(screen, grid)
@@ -116,3 +110,8 @@ def move_elements_in_parallel(grid, target_shape, screen):
                     break
 
     print("Final shape formed!" if shape_formed() else "Stopping with shape incomplete.")
+    print(f"Final shape formed in {steps} steps!" if shape_formed() else f"Stopping with shape incomplete. Steps taken: {steps}")
+
+    return steps  # Return the total number of steps
+
+

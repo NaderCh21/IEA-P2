@@ -4,14 +4,6 @@ from scipy.optimize import linear_sum_assignment
 from astar import astar_path
 
 def optimal_assignment(grid, target_shape):
-    """
-    Computes an optimal assignment of active grid cells to target positions
-    using the Hungarian algorithm. If infeasible, removes worst row/col and retries.
-
-    :param grid: 2D list representing the grid (1 = active cell, 0 = empty).
-    :param target_shape: List of (row, col) positions defining the target shape.
-    :return: List of assigned (current, target) position pairs.
-    """
 
     # Step 1: Collect all active (1-filled) cells
     cells = [(r, c) for r in range(len(grid)) for c in range(len(grid[r])) if grid[r][c] == 1]

@@ -15,7 +15,7 @@ def initialize_grid():
 # Obstacles generation function 
 def add_obstacles(grid, target_shape, obstacle_prob=0.1):
     """
-    Adds obstacles (value 2) to empty cells not in the target shape.
+    Adds obstacles to empty cells not in the target shape.
     """
     for r in range(len(grid)):
         for c in range(len(grid[0])):

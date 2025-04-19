@@ -11,11 +11,6 @@ def heuristic(a, b):
 def astar_path(start, goal, grid):
     """
     Finds the shortest path from start to goal using the A* algorithm.
-    
-    :param start: Tuple (row, col) representing the starting position.
-    :param goal: Tuple (row, col) representing the target position.
-    :param grid: 2D list representing the grid (0 = free, nonzero = blocked except for the goal).
-    :return: List of tuples representing the optimal path, or None if no path exists.
     """
     rows, cols = len(grid), len(grid[0])
 
