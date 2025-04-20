@@ -1,13 +1,23 @@
-# main.py
 import pygame
 import sys
-from constants import WINDOW_SIZE, FPS, CELL_SIZE
-from grid import initialize_grid , add_obstacles
+from constants import CELL_SIZE, FPS, HEADER_HEIGHT, FOOTER_HEIGHT
+from grid import initialize_grid, add_obstacles
 from draw import draw_grid
-from bfs import bfs_path
 from shape_selector import select_target_shape
+from bfs import bfs_path
 
-HEADER_HEIGHT = 60  
+pygame.init()
+pygame.font.init()
+font = pygame.font.Font(None, 28)
+
+grid_size = 10
+input_text = str(grid_size)
+
+def resize_screen(grid_size):
+    return pygame.display.set_mode((grid_size * CELL_SIZE, grid_size * CELL_SIZE + HEADER_HEIGHT + FOOTER_HEIGHT))
+
+screen = resize_screen(grid_size)
+pygame.display.set_caption("Programmable Matter Grid")
 
 def move_single_element(grid, start, target, screen):
     """Moves a single element from start to target using BFS."""
@@ -24,14 +34,9 @@ def move_single_element(grid, start, target, screen):
 
 def move_elements_to_shape(grid, target_shape, screen):
     """Moves multiple elements sequentially to form the target shape."""
-    # Get all current programmable matter positions
     current_positions = [(r, c) for r in range(len(grid)) for c in range(len(grid[r])) if grid[r][c] == 1]
-    
-    # Move each element to its corresponding target cell
     for current, target in zip(current_positions, target_shape):
         move_single_element(grid, current, target, screen)
-    
-    # Ensure any remaining target cells are filled (e.g. inner cells)
     for target in target_shape:
         if grid[target[0]][target[1]] != 1:
             grid[target[0]][target[1]] = 1
@@ -39,25 +44,50 @@ def move_elements_to_shape(grid, target_shape, screen):
             pygame.time.wait(300)
 
 def main():
-    pygame.init()
-    screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE + HEADER_HEIGHT))
-    pygame.display.set_caption("Programmable Matter Grid")
-    grid = initialize_grid()
+    global grid_size, screen, input_text
 
+    grid = initialize_grid(grid_size)
+    clock = pygame.time.Clock()
+    
     while True:
-        # Let the user define the target shape interactively
-        target_shape = select_target_shape(grid, screen, CELL_SIZE)
-        # Adding obstacles 
-        add_obstacles(grid, target_shape, obstacle_prob = 0.1)
-        
-        # Move elements sequentially to form the selected shape
+        # Footer controls
+        input_box = pygame.Rect(150, grid_size * CELL_SIZE + HEADER_HEIGHT + 5, 50, 30)
+        apply_button = pygame.Rect(210, grid_size * CELL_SIZE + HEADER_HEIGHT + 5, 70, 30)
+
+        # User shape selection + grid interaction
+        selection = select_target_shape(grid, screen, CELL_SIZE, input_box, apply_button, input_text, font)
+
+        if selection == "RESET":
+            grid = initialize_grid(grid_size)
+            continue
+
+        if isinstance(selection, tuple) and selection[0] == "APPLY":
+            try:
+                new_size = int(selection[1])
+                if 4 <= new_size <= 50:
+                    grid_size = new_size
+                    input_text = str(grid_size)
+                    screen = resize_screen(grid_size)
+                    grid = initialize_grid(grid_size)
+                    continue
+            except:
+                continue
+
+        # Valid target shape returned
+        target_shape = selection
+
+        # Add obstacles excluding the shape
+        add_obstacles(grid, target_shape, obstacle_prob=0.1)
+
+        # Move to target
         move_elements_to_shape(grid, target_shape, screen)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-        pygame.time.Clock().tick(FPS)
+
+        clock.tick(FPS)
 
 if __name__ == "__main__":
     main()
-    

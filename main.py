@@ -1,50 +1,71 @@
 import pygame
 import sys
-from constants import WINDOW_SIZE, FPS, CELL_SIZE
+from constants import CELL_SIZE, FPS, HEADER_HEIGHT, FOOTER_HEIGHT
 from grid import initialize_grid
 from draw import draw_grid
 from shape_selector import select_target_shape
 from parallel_movement import move_elements_in_parallel
 
-HEADER_HEIGHT = 60  
-FOOTER_HEIGHT = 40  # Add space for footer
-
-
 pygame.init()
-pygame.font.init() 
-screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE + HEADER_HEIGHT + FOOTER_HEIGHT))  
+pygame.font.init()
+font = pygame.font.Font(None, 28)
+
+grid_size = 10
+input_text = str(grid_size)
+
+def resize_screen(grid_size):
+    return pygame.display.set_mode((grid_size * CELL_SIZE, grid_size * CELL_SIZE + HEADER_HEIGHT + FOOTER_HEIGHT))
+
+screen = resize_screen(grid_size)
 pygame.display.set_caption("Programmable Matter Grid")
-grid = initialize_grid()
 
 def main():
-    clock = pygame.time.Clock()
+    global grid_size, screen, input_text
 
-    steps_counter = 0  # Initialize before the loop
+    grid = initialize_grid(grid_size)
+    clock = pygame.time.Clock()
+    steps_counter = 0
 
     while True:
-        target_shape = select_target_shape(grid, screen, CELL_SIZE)  
+        input_box = pygame.Rect(150, grid_size * CELL_SIZE + HEADER_HEIGHT + 5, 50, 30)
+        apply_button = pygame.Rect(210, grid_size * CELL_SIZE + HEADER_HEIGHT + 5, 70, 30)
 
-        steps_counter = move_elements_in_parallel(grid, target_shape, screen)  # Get the step count
-        print(f"DEBUG: Total Steps Received in Main = {steps_counter}")
+        selection = select_target_shape(grid, screen, CELL_SIZE, input_box, apply_button, input_text, font)
 
+        if selection == "RESET":
+            grid = initialize_grid(grid_size)
+            steps_counter = 0
+            continue
+
+        if isinstance(selection, tuple) and selection[0] == "APPLY":
+            try:
+                new_size = int(selection[1])
+                if 4 <= new_size <= 50:
+                    grid_size = new_size
+                    input_text = str(grid_size)
+                    screen = resize_screen(grid_size)
+                    grid = initialize_grid(grid_size)
+                    continue
+            except:
+                continue
+
+        target_shape = selection
+        steps_counter = move_elements_in_parallel(grid, target_shape, screen)
 
         screen.fill((255, 255, 255))
         draw_grid(screen, grid)
 
-        # Keep displaying the footer
-        font = pygame.font.Font(None, 36)
-        text_surface = font.render(f"Total Steps: {steps_counter}", True, (0, 0, 0))
-        screen.blit(text_surface, (10, WINDOW_SIZE + HEADER_HEIGHT - 30))  # Move slightly down
-
-
+        font_footer = pygame.font.Font(None, 36)
+        footer_surface = font_footer.render(f"Total Steps: {steps_counter}", True, (0, 0, 0))
+        screen.blit(footer_surface, (10, grid_size * CELL_SIZE + HEADER_HEIGHT - 5))
         pygame.display.flip()
-    
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-        clock.tick(FPS)
 
+        clock.tick(FPS)
 
 if __name__ == "__main__":
     main()

@@ -1,22 +1,12 @@
-# grid.py
-from constants import GRID_SIZE
-import random
-
-def initialize_grid():
-    """
-    Initializes the grid with the last two rows filled with programmable matter (orange).
-    """
-    grid = [[0 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
-    for row in range(GRID_SIZE - 2, GRID_SIZE):
-        for col in range(GRID_SIZE):
+def initialize_grid(grid_size):
+    grid = [[0 for _ in range(grid_size)] for _ in range(grid_size)]
+    for row in range(grid_size - 2, grid_size):
+        for col in range(grid_size):
             grid[row][col] = 1  # Programmable matter
     return grid
 
-# Obstacles generation function 
 def add_obstacles(grid, target_shape, obstacle_prob=0.1):
-    """
-    Adds obstacles to empty cells not in the target shape.
-    """
+    import random
     for r in range(len(grid)):
         for c in range(len(grid[0])):
             if grid[r][c] == 0 and (r, c) not in target_shape:
