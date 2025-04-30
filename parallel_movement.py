@@ -86,7 +86,7 @@ def move_elements_in_parallel(grid, target_shape, screen):
 
         # Update the display
         draw_grid(screen, grid)
-        pygame.time.wait(500)
+        pygame.time.wait(10)
 
     # Step 5: Repeated single-step nudges to move remaining cells
     changed = True
