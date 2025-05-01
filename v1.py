@@ -11,7 +11,7 @@ pygame.init()
 pygame.font.init()
 font = pygame.font.Font(None, 28)
 
-grid_size = 10
+grid_size = 20
 input_text = str(grid_size)
 # Neighborhood toggle setup
 neighborhood_mode = 'von_neumann'
