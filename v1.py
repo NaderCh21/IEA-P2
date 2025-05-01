@@ -15,7 +15,9 @@ grid_size = 20
 input_text = str(grid_size)
 # Neighborhood toggle setup
 neighborhood_mode = 'von_neumann'
+
 set_neighborhood(neighborhood_mode)
+
 neighborhood_button = pygame.Rect(
     300,
     grid_size * CELL_SIZE + HEADER_HEIGHT + 5,
@@ -30,7 +32,7 @@ def resize_screen(grid_size):
     )
 
 screen = resize_screen(grid_size)
-pygame.display.set_caption("Programmable Matter Grid - Sequential")
+pygame.display.set_caption("Programmable Matter Grid ----- Sequential Execution")
 
 def main():
     global grid_size, screen, input_text, neighborhood_mode
@@ -60,8 +62,8 @@ def main():
             grid,
             screen,
             CELL_SIZE,
-            pygame.Rect(150, grid_size * CELL_SIZE + HEADER_HEIGHT + 5, 50, 30),
-            pygame.Rect(210, grid_size * CELL_SIZE + HEADER_HEIGHT + 5, 70, 30),
+            pygame.Rect(450, grid_size * CELL_SIZE + HEADER_HEIGHT + 5, 50, 30),
+            pygame.Rect(510, grid_size * CELL_SIZE + HEADER_HEIGHT + 5, 70, 30),
             input_text,
             font
         )

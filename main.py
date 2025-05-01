@@ -83,7 +83,7 @@ def resize_screen(size):
     )
 
 screen = resize_screen(grid_size)
-pygame.display.set_caption("Programmable Matter Grid")
+pygame.display.set_caption("Programmable Matter Grid  ------   Parallel Execution  ")
 
 def main():
     global grid_size, screen, input_text
@@ -98,6 +98,8 @@ def main():
     clock = pygame.time.Clock()
     steps_counter = 0
     target_shape = None
+
+
 
     # Phase 1: Configuration UI
     while target_shape is None:
@@ -201,6 +203,7 @@ def main():
 
     steps_counter = steps_container['count']
 
+    """""
     # Phase 4: Final display
     screen.fill((255, 255, 255))
     draw_grid(screen, grid)
@@ -213,6 +216,9 @@ def main():
     footer = pygame.font.Font(None, 36).render(f"Total Steps: {steps_counter}", True, (0, 0, 0))
     screen.blit(footer, (10, grid_size * CELL_SIZE + HEADER_HEIGHT - 5))
     pygame.display.flip()
+    """
+
+
 
     # Phase 5: Idle
     while True:
