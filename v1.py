@@ -1,4 +1,6 @@
 ### v1.py with 20 Initial Module Agents (bottom two rows)
+import random
+import math
 import pygame
 import sys
 from constants import CELL_SIZE, FPS, HEADER_HEIGHT, FOOTER_HEIGHT
@@ -33,6 +35,38 @@ def resize_screen(grid_size):
 
 screen = resize_screen(grid_size)
 pygame.display.set_caption("Programmable Matter Grid ----- Sequential Execution")
+
+
+
+
+def stochastic_sequential_assignment(grid, target_shape, k=3, T=1.0):
+    """
+    Build a Restricted Candidate List (RCL) of size k for each module,
+    then pick one target at random from that RCL.
+    """
+    current = [(r, c) for r in range(len(grid)) for c in range(len(grid[r])) if grid[r][c] == 1]
+    remaining = set(target_shape)
+    pairs = []
+
+    for cell in current:
+        # gather distances to all still-free targets
+        dists = []
+        for tgt in remaining:
+            path = bfs_path(cell, tgt, grid)
+            if path:
+                dists.append((len(path), tgt))
+        if not dists:
+            continue
+        # RCL: the k smallest distances
+        dists.sort(key=lambda x: x[0])
+        rcl = dists[:k]
+        # pick one at random
+        choice = random.choice(rcl)[1]
+        pairs.append((cell, choice))
+        remaining.remove(choice)
+    return pairs
+
+
 
 def main():
     global grid_size, screen, input_text, neighborhood_mode
@@ -92,9 +126,14 @@ def main():
         target_shape = sel
         add_obstacles(grid, target_shape, obstacle_prob=0.1)
 
-    # Phase 2: Sequential movement per agent
+    
+    """     Sequential movement per agent    """
     starts = [(r, c) for r in range(len(grid)) for c in range(len(grid[r])) if grid[r][c] == 1]
     pairs = list(zip(starts, target_shape))
+    
+    """     Stochastic Movement per agent    """
+    
+    #pairs = stochastic_sequential_assignment(grid, target_shape, k=3, T=1.0)
 
     for start, target in pairs:
         path = bfs_path(start, target, grid)
@@ -160,5 +199,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+
 
 

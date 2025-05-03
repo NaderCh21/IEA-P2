@@ -1,3 +1,5 @@
+import random
+import math
 import pygame
 from draw import draw_grid
 from astar import astar_path
@@ -92,6 +94,30 @@ def distributed_greedy_assignment(grid, target_shape):
 
 
 
+def stochastic_distributed_assignment(grid, target_shape, T=1.0):
+    """
+    For each module, sample a target by cost-softmin:
+      P(tgt) ∝ exp(–distance(cell→tgt) / T)
+    """
+    current = [(r, c) for r in range(len(grid)) for c in range(len(grid[r])) if grid[r][c] == 1]
+    assigns = []
+    for cell in current:
+        choices = []
+        for tgt in target_shape:
+            path = astar_path(cell, tgt, grid)
+            if path:
+                choices.append((tgt, len(path)))
+        if not choices:
+            continue
+        # softmin weights
+        weights = [math.exp(-dist/T) for (_, dist) in choices]
+        total = sum(weights)
+        probs  = [w/total for w in weights]
+        targets = [tgt for (tgt, _) in choices]
+        pick = random.choices(targets, weights=probs, k=1)[0]
+        assigns.append((cell, pick))
+    return assigns
+
 
 
 
@@ -127,8 +153,10 @@ def move_elements_in_parallel(grid, target_shape, screen, assignment_mode='Hunga
             assignments = optimal_assignment(grid, target_shape)
         elif assignment_mode == 'Distributed':  # Distributed Greedy Mode
             assignments = distributed_greedy_assignment(grid, target_shape)
-        else:  # Greedy mode
+        elif assignment_mode == 'Greedy': # Greedy mode
             assignments = greedy_assignment(grid, target_shape)
+        elif assignment_mode == 'Stochastic':
+            assignments = stochastic_distributed_assignment(grid, target_shape, T=1.0)
         if not assignments:
             print("No valid assignments. Stopping.")
             break
