@@ -203,12 +203,12 @@ def main():
 
     steps_counter = steps_container['count']
 
-    """""
+    
     # Phase 4: Final display
     screen.fill((255, 255, 255))
     draw_grid(screen, grid)
-    pygame.draw.rect(screen, (200, 200, 200), neighborhood_button)
-    screen.blit(topo_label, (neighborhood_button.x + 5, neighborhood_button.y + 5))
+    pygame.draw.rect(screen, (200, 200, 200), neighborhood_button) # Topology
+    screen.blit(topo_label, (neighborhood_button.x + 5 , neighborhood_button.y + 5))
     pygame.draw.rect(screen, (200, 200, 200), assignment_button)
     screen.blit(assign_label, (assignment_button.x + 5, assignment_button.y + 5))
     pygame.draw.rect(screen, (200, 200, 200), movement_button)
@@ -216,7 +216,7 @@ def main():
     footer = pygame.font.Font(None, 36).render(f"Total Steps: {steps_counter}", True, (0, 0, 0))
     screen.blit(footer, (10, grid_size * CELL_SIZE + HEADER_HEIGHT - 5))
     pygame.display.flip()
-    """
+    
 
 
 
