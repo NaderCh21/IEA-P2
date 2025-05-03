@@ -1,5 +1,6 @@
 # bfs.py
 from collections import deque
+from grid import VON_NEUMANN_OFFSETS, MOORE_OFFSETS
 
 def bfs_path(start, goal, grid):
     """
@@ -11,7 +12,14 @@ def bfs_path(start, goal, grid):
     :return: List of tuples representing the path from start to goal.
     """
     rows, cols = len(grid), len(grid[0])
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # Von Neumann topology
+
+
+
+    #directions = VON_NEUMANN_OFFSETS            # -----------------TWEEK 
+    directions = MOORE_OFFSETS
+
+
+
     queue = deque([start])
     visited = set([start])
     parent = {start: None}

@@ -129,7 +129,7 @@ def stochastic_distributed_assignment(grid, target_shape, T=1.0):
 
 
 
-def move_elements_in_parallel(grid, target_shape, screen, assignment_mode='Hungarian', movement_mode='Synchronous'):
+def move_elements_in_parallel(grid, target_shape, screen, assignment_mode, movement_mode):
     """
     Moves the modules in the grid toward the target_shape in parallel, according to the 
     selected assignment algorithm and movement mode. Returns the total number of steps.

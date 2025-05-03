@@ -1,5 +1,6 @@
 # astar.py
 import heapq 
+from bfs import VON_NEUMANN_OFFSETS, MOORE_OFFSETS
 
 def heuristic(a, b):
     """
@@ -38,7 +39,7 @@ def astar_path(start, goal, grid):
         closed_set.add(current)
 
         # Explore valid neighboring cells (Von Neumann neighborhood)
-        for dx, dy in [(0,1), (1,0), (0,-1), (-1,0)]:
+        for dx, dy in VON_NEUMANN_OFFSETS:                               # ---------TWEEK 
             nx, ny = current[0] + dx, current[1] + dy
 
             # Ensure within grid bounds

@@ -1,4 +1,4 @@
-### v1.py with 20 Initial Module Agents (bottom two rows)
+### v1.py with 40 Initial Module Agents (bottom two rows)
 import random
 import math
 import pygame
@@ -7,19 +7,22 @@ from constants import CELL_SIZE, FPS, HEADER_HEIGHT, FOOTER_HEIGHT
 from grid import initialize_grid, add_obstacles, set_neighborhood
 from draw import draw_grid
 from shape_selector import select_target_shape
-from bfs import bfs_path
+from bfs import bfs_path                            # ----  Choose between Astar or BFS
+from astar import astar_path                        # ----
 
 pygame.init()
 pygame.font.init()
 font = pygame.font.Font(None, 28)
 
-grid_size = 20
+grid_size = 10
 input_text = str(grid_size)
 
-# Neighborhood toggle setup
+
+
+
 #neighborhood_mode = 'von_neumann'               # ---------------TWEEK
 neighborhood_mode = 'moore'
-#set_neighborhood(neighborhood_mode)
+
 
 neighborhood_button = pygame.Rect(
     300,
@@ -40,6 +43,10 @@ pygame.display.set_caption("Programmable Matter Grid ----- Sequential Execution"
 
 
 
+
+
+
+
 def stochastic_sequential_assignment(grid, target_shape, k=3, T=1.0):
     """
     Build a Restricted Candidate List (RCL) of size k for each module,
@@ -53,7 +60,7 @@ def stochastic_sequential_assignment(grid, target_shape, k=3, T=1.0):
         # gather distances to all still-free targets
         dists = []
         for tgt in remaining:
-            path = bfs_path(cell, tgt, grid)
+            path = bfs_path(cell, tgt, grid)                      #----------TWEEK 
             if path:
                 dists.append((len(path), tgt))
         if not dists:
@@ -66,6 +73,11 @@ def stochastic_sequential_assignment(grid, target_shape, k=3, T=1.0):
         pairs.append((cell, choice))
         remaining.remove(choice)
     return pairs
+
+
+
+
+
 
 
 
@@ -125,8 +137,9 @@ def main():
             continue
 
         target_shape = sel
-        add_obstacles(grid, target_shape, obstacle_prob=0.01)
+        add_obstacles(grid, target_shape, obstacle_prob=0.1)
 
+    #--------------------TWEEK
     
     """     Sequential movement per agent    """
     starts = [(r, c) for r in range(len(grid)) for c in range(len(grid[r])) if grid[r][c] == 1]
@@ -137,7 +150,7 @@ def main():
     #pairs = stochastic_sequential_assignment(grid, target_shape, k=3, T=1.0)
 
     for start, target in pairs:
-        path = bfs_path(start, target, grid)
+        path = bfs_path(start, target, grid)              #------- TWEEK
         if not path:
             continue
         prev = path[0]

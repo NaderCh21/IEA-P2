@@ -3,7 +3,7 @@
 # Grid constants
 CELL_SIZE = 30
 GRID_SIZE = 10
-FPS = 100
+FPS = 60
 
 # Colors
 WHITE = (255, 255, 255)

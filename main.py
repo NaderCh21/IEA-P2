@@ -32,7 +32,7 @@ def draw_ui(screen, grid_size, neighborhood_mode, assignment_mode, movement_mode
     topo_rect = pygame.Rect(padding, y_ui, btn_w_nav, btn_h)
     pygame.draw.rect(screen, bg_color, topo_rect, border_radius=5)
     topo_text = font.render(
-        f"Topology: {'V-N' if neighborhood_mode=='von_neumann' else 'Moore'}", True, text_color
+        f"Topology: {'V-N' if neighborhood_mode=='von_neumann' else 'moore'}", True, text_color
     )
     screen.blit(topo_text, (topo_rect.x + 10, topo_rect.y + 5))
 
@@ -62,13 +62,15 @@ def main():
     # Initial parameters
     grid_size = 20
     input_text = str(grid_size)
-    neighborhood_mode = 'von_neumann'
+    neighborhood_mode = 'von_neumann'                             # ----------TWEEK
+    #neighborhood_mode = 'moore'
+
     #assignment_modes = ['Hungarian', 'Greedy', 'Distributed', 'Stochastic']
     #movement_modes = ['Synchronous', 'Asynchronous']
-    assignment_mode = assignment_modes[0]
+    assignment_mode = assignment_modes[0]                                   #-------------TWEEK
     movement_mode = movement_modes[0]
 
-    set_neighborhood(neighborhood_mode)
+    
     screen = resize_screen(grid_size)
     pygame.display.set_caption("Programmable Matter Grid | Parallel Execution")
 
@@ -97,7 +99,7 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if topo_btn.collidepoint(mx, my):
-                    neighborhood_mode = 'moore' if neighborhood_mode=='von_neumann' else 'von_neumann'
+                    neighborhood_mode = 'von_neumann' if neighborhood_mode=='von_neumann' else 'moore'
                     set_neighborhood(neighborhood_mode)
                 elif assign_btn.collidepoint(mx, my):
                     idx = assignment_modes.index(assignment_mode)
@@ -162,7 +164,7 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if topo_btn.collidepoint(mx, my):
-                    neighborhood_mode = 'moore' if neighborhood_mode=='von_neumann' else 'von_neumann'
+                    neighborhood_mode = 'von_neumann' if neighborhood_mode=='von_neumann' else 'moore'
                     set_neighborhood(neighborhood_mode)
                 elif assign_btn.collidepoint(mx, my):
                     idx = assignment_modes.index(assignment_mode)
