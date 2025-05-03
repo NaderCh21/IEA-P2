@@ -15,10 +15,11 @@ font = pygame.font.Font(None, 28)
 
 grid_size = 20
 input_text = str(grid_size)
-# Neighborhood toggle setup
-neighborhood_mode = 'von_neumann'
 
-set_neighborhood(neighborhood_mode)
+# Neighborhood toggle setup
+#neighborhood_mode = 'von_neumann'               # ---------------TWEEK
+neighborhood_mode = 'moore'
+#set_neighborhood(neighborhood_mode)
 
 neighborhood_button = pygame.Rect(
     300,
@@ -71,9 +72,9 @@ def stochastic_sequential_assignment(grid, target_shape, k=3, T=1.0):
 def main():
     global grid_size, screen, input_text, neighborhood_mode
 
-    # Initialize grid and add module pool at bottom two rows (20 agents)
+    # Phase 0: Initialize grid
     grid = initialize_grid(grid_size)
-    for row in (grid_size - 1, grid_size - 2):
+    for row in (grid_size - 1, grid_size - 2, grid_size - 3):
         for c in range(grid_size):
             grid[row][c] = 1
 
@@ -89,7 +90,7 @@ def main():
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if neighborhood_button.collidepoint(event.pos):
-                    neighborhood_mode = 'moore' if neighborhood_mode == 'von_neumann' else 'von_neumann'
+                    neighborhood_mode = 'von_neumann' if neighborhood_mode == 'von_neumann' else 'moore'
                     set_neighborhood(neighborhood_mode)
 
         sel = select_target_shape(
@@ -124,7 +125,7 @@ def main():
             continue
 
         target_shape = sel
-        add_obstacles(grid, target_shape, obstacle_prob=0.1)
+        add_obstacles(grid, target_shape, obstacle_prob=0.01)
 
     
     """     Sequential movement per agent    """
@@ -168,7 +169,7 @@ def main():
                 if event.type == pygame.QUIT:
                     pygame.quit(); sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN and neighborhood_button.collidepoint(event.pos):
-                    neighborhood_mode = 'moore' if neighborhood_mode == 'von_neumann' else 'von_neumann'
+                    neighborhood_mode = 'moore' if neighborhood_mode == 'moore' else 'von_neumann'
                     set_neighborhood(neighborhood_mode)
             clock.tick(FPS)
 

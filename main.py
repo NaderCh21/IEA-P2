@@ -1,5 +1,3 @@
-
-
 import pygame
 import sys
 import threading
@@ -13,64 +11,44 @@ pygame.init()
 pygame.font.init()
 font = pygame.font.Font(None, 28)
 
-# Initial parameters
-grid_size = 20
-input_text = str(grid_size)
-
-
-# Topology toggle
-neighborhood_mode = 'von_neumann'
-set_neighborhood(neighborhood_mode)
-neighborhood_button = pygame.Rect(
-    10,
-    grid_size * CELL_SIZE + HEADER_HEIGHT + 5,
-    120,
-    30
-)
-
-
-# Assignment toggle            
+# Modes and options
 assignment_modes = ['Hungarian', 'Greedy', 'Distributed', 'Stochastic']
-assignment_mode = assignment_modes[0]  #--------------------- TWEEK         For Stochastic and other modes that do not converge, might think to add stoppage() 
-assignment_button = pygame.Rect(
-    140,
-    grid_size * CELL_SIZE + HEADER_HEIGHT + 5,
-    140,
-    30
-)
-
-# Movement toggle
 movement_modes = ['Synchronous', 'Asynchronous']
-movement_mode = movement_modes[0]  # --------------------------TWEEK 
-movement_button = pygame.Rect(
-    10,
-    grid_size * CELL_SIZE + HEADER_HEIGHT + 5,
-    140,
-    30
-)
-
-# Shape-selector buttons
-reset_rect = pygame.Rect(
-    450,
-    grid_size * CELL_SIZE + HEADER_HEIGHT + 5,
-    50,
-    30
-)
-apply_rect = pygame.Rect(
-    510,
-    grid_size * CELL_SIZE + HEADER_HEIGHT + 5,
-    70,
-    30
-)
-
-neighborhood_button = pygame.Rect(
-    510,
-    grid_size * CELL_SIZE + HEADER_HEIGHT - 10 ,
-    70,
-    30
-)
 
 
+def draw_ui(screen, grid_size, neighborhood_mode, assignment_mode, movement_mode):
+    """Draws styled UI buttons for topology, assignment, and movement modes."""
+    y_ui = grid_size * CELL_SIZE + HEADER_HEIGHT + 10
+    # Styling
+    bg_color = (50, 50, 50)
+    text_color = (255, 255, 255)
+    btn_h = 30
+    btn_w_nav = 140
+    btn_w_assign = 160
+    btn_w_move = 160
+    padding = 10
+
+    # Topology button
+    topo_rect = pygame.Rect(padding, y_ui, btn_w_nav, btn_h)
+    pygame.draw.rect(screen, bg_color, topo_rect, border_radius=5)
+    topo_text = font.render(
+        f"Topology: {'V-N' if neighborhood_mode=='von_neumann' else 'Moore'}", True, text_color
+    )
+    screen.blit(topo_text, (topo_rect.x + 10, topo_rect.y + 5))
+
+    # Assignment button
+    assign_rect = pygame.Rect(padding*2 + btn_w_nav, y_ui, btn_w_assign, btn_h)
+    pygame.draw.rect(screen, bg_color, assign_rect, border_radius=5)
+    assign_text = font.render(f"Assign: {assignment_mode}", True, text_color)
+    screen.blit(assign_text, (assign_rect.x + 10, assign_rect.y + 5))
+
+    # Movement button
+    move_rect = pygame.Rect(padding*3 + btn_w_nav + btn_w_assign, y_ui, btn_w_move, btn_h)
+    pygame.draw.rect(screen, bg_color, move_rect, border_radius=5)
+    move_text = font.render(f"Move: {movement_mode}", True, text_color)
+    screen.blit(move_text, (move_rect.x + 10, move_rect.y + 5))
+
+    return topo_rect, assign_rect, move_rect
 
 
 def resize_screen(size):
@@ -79,82 +57,62 @@ def resize_screen(size):
          size * CELL_SIZE + HEADER_HEIGHT + FOOTER_HEIGHT)
     )
 
-screen = resize_screen(grid_size)
-pygame.display.set_caption("Programmable Matter Grid  ------   Parallel Execution  ")
-
-
-
-
-
-
 
 def main():
-    global grid_size, screen, input_text
-    global neighborhood_mode, assignment_mode, movement_mode
+    # Initial parameters
+    grid_size = 20
+    input_text = str(grid_size)
+    neighborhood_mode = 'von_neumann'
+    #assignment_modes = ['Hungarian', 'Greedy', 'Distributed', 'Stochastic']
+    #movement_modes = ['Synchronous', 'Asynchronous']
+    assignment_mode = assignment_modes[0]
+    movement_mode = movement_modes[0]
 
-   # Phase 0: Initialize grid (bottom 3 rows are “agents”)
+    set_neighborhood(neighborhood_mode)
+    screen = resize_screen(grid_size)
+    pygame.display.set_caption("Programmable Matter Grid | Parallel Execution")
+
+    clock = pygame.time.Clock()
+    target_shape = None
+
+    # Phase 0: Initialize grid
     grid = initialize_grid(grid_size)
     for row in (grid_size - 1, grid_size - 2, grid_size - 3):
         for c in range(grid_size):
             grid[row][c] = 1
 
-    clock = pygame.time.Clock()
-    steps_counter = 0
-    target_shape = None
-    
-
-
     # Phase 1: Configuration UI
     while target_shape is None:
         screen.fill((255, 255, 255))
         draw_grid(screen, grid)
-
-        # Topology button
-        pygame.draw.rect(screen, (200, 200, 200), neighborhood_button)
-        topo_label = font.render(
-            f"Topology: {'V-N' if neighborhood_mode=='von_neumann' else 'Moore'}",
-            True, (0, 0, 0)
+        topo_btn, assign_btn, move_btn = draw_ui(
+            screen, grid_size, neighborhood_mode, assignment_mode, movement_mode
         )
-        screen.blit(topo_label, (neighborhood_button.x + 5, neighborhood_button.y + 5))
-
-        # Assignment button
-        pygame.draw.rect(screen, (200, 200, 200), assignment_button)
-        assign_label = font.render(f"Assign: {assignment_mode}", True, (0, 0, 0))
-        screen.blit(assign_label, (assignment_button.x + 5, assignment_button.y + 5))
-
-        # Movement button
-        pygame.draw.rect(screen, (200, 200, 200), movement_button)
-        move_label = font.render(f"Move: {movement_mode}", True, (0, 0, 0))
-        screen.blit(move_label, (movement_button.x + 5, movement_button.y + 5))
-
         pygame.display.flip()
 
-        
+        # Handle toggles
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
-                if neighborhood_button.collidepoint(mx, my):
+                if topo_btn.collidepoint(mx, my):
                     neighborhood_mode = 'moore' if neighborhood_mode=='von_neumann' else 'von_neumann'
                     set_neighborhood(neighborhood_mode)
-                elif assignment_button.collidepoint(mx, my):
+                elif assign_btn.collidepoint(mx, my):
                     idx = assignment_modes.index(assignment_mode)
                     assignment_mode = assignment_modes[(idx + 1) % len(assignment_modes)]
-                elif movement_button.collidepoint(mx, my):
+                elif move_btn.collidepoint(mx, my):
                     idx = movement_modes.index(movement_mode)
                     movement_mode = movement_modes[(idx + 1) % len(movement_modes)]
-        
 
-        
-        # Pass control to shape selector
+        # Shape selector (unchanged)
         sel = select_target_shape(
             grid, screen, CELL_SIZE,
-            reset_rect, apply_rect,
-            input_text, font, 
-            
+            pygame.Rect(450, grid_size * CELL_SIZE + HEADER_HEIGHT + 5, 50, 30),
+            pygame.Rect(510, grid_size * CELL_SIZE + HEADER_HEIGHT + 5, 70, 30),
+            input_text, font
         )
-
         if sel == 'RESET':
             grid = initialize_grid(grid_size)
             for row in (grid_size - 1, grid_size - 2, grid_size - 3):
@@ -175,14 +133,12 @@ def main():
             except ValueError:
                 pass
             continue
-
         target_shape = sel
-        add_obstacles(grid, target_shape, obstacle_prob=0.1)
+        add_obstacles(grid, target_shape, obstacle_prob=0.01)
 
     # Phase 2: Run movement in background
     done_event = threading.Event()
     steps_container = {'count': 0}
-
     def run_parallel():
         steps_container['count'] = move_elements_in_parallel(
             grid, target_shape, screen,
@@ -190,40 +146,43 @@ def main():
             movement_mode=movement_mode
         )
         done_event.set()
+    threading.Thread(target=run_parallel, daemon=True).start()
 
-    thread = threading.Thread(target=run_parallel, daemon=True)
-    thread.start()
-
-    # Phase 3: Wait, allow topology toggles
+    # Phase 3: Movement with real-time UI toggles
     while not done_event.is_set():
+        screen.fill((255, 255, 255))
+        draw_grid(screen, grid)
+        topo_btn, assign_btn, move_btn = draw_ui(
+            screen, grid_size, neighborhood_mode, assignment_mode, movement_mode
+        )
+        pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN and neighborhood_button.collidepoint(event.pos):
-                neighborhood_mode = 'moore' if neighborhood_mode=='von_neumann' else 'von_neumann'
-                set_neighborhood(neighborhood_mode)
-        pygame.time.wait(100)
-        pygame.event.pump()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mx, my = event.pos
+                if topo_btn.collidepoint(mx, my):
+                    neighborhood_mode = 'moore' if neighborhood_mode=='von_neumann' else 'von_neumann'
+                    set_neighborhood(neighborhood_mode)
+                elif assign_btn.collidepoint(mx, my):
+                    idx = assignment_modes.index(assignment_mode)
+                    assignment_mode = assignment_modes[(idx + 1) % len(assignment_modes)]
+                elif move_btn.collidepoint(mx, my):
+                    idx = movement_modes.index(movement_mode)
+                    movement_mode = movement_modes[(idx + 1) % len(movement_modes)]
+        clock.tick(FPS)
 
     steps_counter = steps_container['count']
 
-    
     # Phase 4: Final display
     screen.fill((255, 255, 255))
     draw_grid(screen, grid)
-    
-    pygame.draw.rect(screen, (200, 200, 200), neighborhood_button) # Topology
-    screen.blit(topo_label, (neighborhood_button.x + 5 , neighborhood_button.y + 5))
-    pygame.draw.rect(screen, (200, 200, 200), assignment_button)
-    screen.blit(assign_label, (assignment_button.x + 5, assignment_button.y + 5))
-    pygame.draw.rect(screen, (200, 200, 200), movement_button)
-    screen.blit(move_label, (movement_button.x + 5, movement_button.y + 5))
-    footer = pygame.font.Font(None, 36).render(f"Total Steps: {steps_counter}", True, (0, 0, 0))
+    draw_ui(screen, grid_size, neighborhood_mode, assignment_mode, movement_mode)
+    footer = pygame.font.Font(None, 36).render(
+        f"Total Steps: {steps_counter}", True, (0, 0, 0)
+    )
     screen.blit(footer, (10, grid_size * CELL_SIZE + HEADER_HEIGHT - 5))
     pygame.display.flip()
-    
-
-
 
     # Phase 5: Idle
     while True:
