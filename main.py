@@ -1,3 +1,5 @@
+
+
 import pygame
 import sys
 import threading
@@ -16,11 +18,6 @@ grid_size = 20
 input_text = str(grid_size)
 
 
-
-
-
-
-
 # Topology toggle
 neighborhood_mode = 'von_neumann'
 set_neighborhood(neighborhood_mode)
@@ -32,9 +29,9 @@ neighborhood_button = pygame.Rect(
 )
 
 
-# Assignment toggle (now with Distributed)            
-assignment_modes = ['Hungarian', 'Greedy', 'Distributed']
-assignment_mode = assignment_modes[0]  #--------------------- TWEEK 
+# Assignment toggle            
+assignment_modes = ['Hungarian', 'Greedy', 'Distributed', 'Stochastic']
+assignment_mode = assignment_modes[0]  #--------------------- TWEEK         For Stochastic and other modes that do not converge, might think to add stoppage() 
 assignment_button = pygame.Rect(
     140,
     grid_size * CELL_SIZE + HEADER_HEIGHT + 5,
@@ -85,20 +82,26 @@ def resize_screen(size):
 screen = resize_screen(grid_size)
 pygame.display.set_caption("Programmable Matter Grid  ------   Parallel Execution  ")
 
+
+
+
+
+
+
 def main():
     global grid_size, screen, input_text
     global neighborhood_mode, assignment_mode, movement_mode
 
-    # Phase 0: Initialize grid
+   # Phase 0: Initialize grid (bottom 3 rows are “agents”)
     grid = initialize_grid(grid_size)
-    for row in (grid_size - 1, grid_size - 2):
+    for row in (grid_size - 1, grid_size - 2, grid_size - 3):
         for c in range(grid_size):
             grid[row][c] = 1
 
     clock = pygame.time.Clock()
     steps_counter = 0
     target_shape = None
-
+    
 
 
     # Phase 1: Configuration UI
@@ -126,6 +129,7 @@ def main():
 
         pygame.display.flip()
 
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
@@ -153,7 +157,7 @@ def main():
 
         if sel == 'RESET':
             grid = initialize_grid(grid_size)
-            for row in (grid_size - 1, grid_size - 2):
+            for row in (grid_size - 1, grid_size - 2, grid_size - 3):
                 for c in range(grid_size):
                     grid[row][c] = 1
             continue
@@ -207,6 +211,7 @@ def main():
     # Phase 4: Final display
     screen.fill((255, 255, 255))
     draw_grid(screen, grid)
+    
     pygame.draw.rect(screen, (200, 200, 200), neighborhood_button) # Topology
     screen.blit(topo_label, (neighborhood_button.x + 5 , neighborhood_button.y + 5))
     pygame.draw.rect(screen, (200, 200, 200), assignment_button)
