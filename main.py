@@ -79,12 +79,12 @@ def draw_shape_selector(grid, screen, cell_size, input_text, font, grid_size, st
     )
 
 
-def main():
+def main(neighborhood_mode='moore'):
     # Initial parameters
     grid_size = 20
     input_text = str(grid_size)
     #neighborhood_mode = 'von_neumann'                             # ----------TWEEK
-    neighborhood_mode = 'moore'
+    #neighborhood_mode = 'moore'
     steps_counter = 0
 
     #assignment_modes = ['Hungarian', 'Greedy', 'Distributed', 'Stochastic']
@@ -233,7 +233,7 @@ def main():
         # 1) handle quit / pyramid / reset / apply clicks
         sel = draw_shape_selector(grid, screen, CELL_SIZE, input_text, font, grid_size , steps_counter)
         if sel == 'RESET':
-            return main()   # restart from phase 1
+            return main(neighborhood_mode)   # restart from phase 1
         if isinstance(sel, tuple) and sel[0] == 'APPLY':
             try:
                 new_size = int(sel[1])
@@ -245,7 +245,7 @@ def main():
                     for row in (grid_size-1, grid_size-2, grid_size-3):
                         for c in range(grid_size):
                             grid[row][c] = 1
-                    return main()   # restart with new grid_size
+                    return main(neighborhood_mode)   # restart with new grid_size
             except ValueError:
                 pass
 
