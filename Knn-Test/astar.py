@@ -1,6 +1,5 @@
 # astar.py
 import heapq 
-from bfs import VON_NEUMANN_OFFSETS, MOORE_OFFSETS
 
 def heuristic(a, b):
     """
@@ -9,7 +8,7 @@ def heuristic(a, b):
     """
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
-def astar_path(start, goal, grid, neighborhood_mode):
+def astar_path(start, goal, grid):
     """
     Finds the shortest path from start to goal using the A* algorithm.
     """
@@ -39,8 +38,7 @@ def astar_path(start, goal, grid, neighborhood_mode):
         closed_set.add(current)
 
         # Explore valid neighboring cells (Von Neumann neighborhood)
-        offsets = MOORE_OFFSETS if neighborhood_mode == 'moore' else VON_NEUMANN_OFFSETS
-        for dx, dy in offsets:
+        for dx, dy in [(0,1), (1,0), (0,-1), (-1,0)]:
             nx, ny = current[0] + dx, current[1] + dy
 
             # Ensure within grid bounds

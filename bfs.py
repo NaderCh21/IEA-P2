@@ -2,7 +2,7 @@
 from collections import deque
 from grid import VON_NEUMANN_OFFSETS, MOORE_OFFSETS
 
-def bfs_path(start, goal, grid):
+def bfs_path(start, goal, grid , directions):
     """
     Finds the shortest path from start to goal using BFS.
     The goal cell is allowed even if it is not empty.
@@ -16,7 +16,7 @@ def bfs_path(start, goal, grid):
 
 
     #directions = VON_NEUMANN_OFFSETS            # -----------------TWEEK 
-    directions = MOORE_OFFSETS
+    #directions = MOORE_OFFSETS
 
 
 

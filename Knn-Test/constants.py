@@ -3,7 +3,7 @@
 # Grid constants
 CELL_SIZE = 30
 GRID_SIZE = 10
-FPS = 40
+FPS = 60
 
 # Colors
 WHITE = (255, 255, 255)
@@ -16,4 +16,3 @@ DARK_GRAY = (50, 50, 50)
 # Layout
 HEADER_HEIGHT = 60
 FOOTER_HEIGHT = 40
-MIN_UI_WIDTH   = 240 

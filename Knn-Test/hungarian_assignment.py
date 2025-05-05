@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from astar import astar_path
 
-def optimal_assignment(grid, target_shape , neighborhood_mode):
+def optimal_assignment(grid, target_shape):
 
     # Step 1: Collect all active (1-filled) cells
     cells = [(r, c) for r in range(len(grid)) for c in range(len(grid[r])) if grid[r][c] == 1]
@@ -12,7 +12,7 @@ def optimal_assignment(grid, target_shape , neighborhood_mode):
 
     # Step 2: Build cost matrix using A* path lengths
     cost_matrix = np.array([
-        [len(astar_path(cell, tgt, grid, neighborhood_mode)) if astar_path(cell, tgt, grid,neighborhood_mode) else float('inf') for tgt in target_shape]
+        [len(astar_path(cell, tgt, grid)) if astar_path(cell, tgt, grid) else float('inf') for tgt in target_shape]
         for cell in cells
     ], dtype=float)
 

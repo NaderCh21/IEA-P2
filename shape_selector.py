@@ -73,8 +73,16 @@ DROPDOWN_X, DROPDOWN_Y, DROPDOWN_WIDTH = 20, 15, 120
 BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT = 160, 15, 80, 30
 MAX_CUSTOM_CELLS = 40
 
-def draw_ui(screen, selected_shape, dropdown_open, input_box, apply_button, font, input_text):
+TOPOLOGY_DROPDOWN_X, TOPOLOGY_DROPDOWN_Y, TOPOLOGY_DROPDOWN_WIDTH = 250, 15, 120
+topology_options = ["Von Neumann", "Moore"]
+selected_topology = "Moore"
+topology_dropdown_open = False
+
+
+
+def draw_ui(screen, selected_shape, dropdown_open, input_box, apply_button, font, input_text, selected_topology, topology_dropdown_open, steps_counter):
     # Dropdown
+    
     pygame.draw.rect(screen, (200, 200, 200), (DROPDOWN_X, DROPDOWN_Y, DROPDOWN_WIDTH, 30))
     pygame.draw.rect(screen, (0, 0, 0), (DROPDOWN_X, DROPDOWN_Y, DROPDOWN_WIDTH, 30), 2)
     screen.blit(font.render(selected_shape, True, (0, 0, 0)), (DROPDOWN_X + 10, DROPDOWN_Y + 5))
@@ -93,9 +101,32 @@ def draw_ui(screen, selected_shape, dropdown_open, input_box, apply_button, font
     pygame.draw.rect(screen, (0, 0, 0), (BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT), 2)
     screen.blit(font.render("Reset", True, (255, 255, 255)), (BUTTON_X + 15, BUTTON_Y + 5))
 
+    # Topology Dropdown
+    pygame.draw.rect(screen, (180, 180, 255), (TOPOLOGY_DROPDOWN_X, TOPOLOGY_DROPDOWN_Y, TOPOLOGY_DROPDOWN_WIDTH, 30))
+    pygame.draw.rect(screen, (0, 0, 0), (TOPOLOGY_DROPDOWN_X, TOPOLOGY_DROPDOWN_Y, TOPOLOGY_DROPDOWN_WIDTH, 30), 2)
+    screen.blit(font.render(selected_topology, True, (0, 0, 0)), (TOPOLOGY_DROPDOWN_X + 10, TOPOLOGY_DROPDOWN_Y + 5))
+
+    if topology_dropdown_open:
+        for i, option in enumerate(topology_options):
+            rect = pygame.Rect(TOPOLOGY_DROPDOWN_X, TOPOLOGY_DROPDOWN_Y + 30 * (i + 1), TOPOLOGY_DROPDOWN_WIDTH, 30)
+            pygame.draw.rect(screen, (230, 230, 255), rect)
+            pygame.draw.rect(screen, (0, 0, 0), rect, 2)
+            screen.blit(font.render(option, True, (0, 0, 0)), (rect.x + 10, rect.y + 5))
+
+
+
     # Footer Input
     footer_y = screen.get_height() - FOOTER_HEIGHT + 5
-    screen.blit(font.render("Grid Size:", True, (0, 0, 0)), (20, footer_y))
+    # Render Total Steps
+    footer_steps_label = font.render(f"Total Steps: {steps_counter}", True, (0, 0, 0))
+    steps_label_width = footer_steps_label.get_width()
+
+    # Position it 20px from the right edge of the *visible screen*
+    screen.blit(footer_steps_label, (screen.get_width() - steps_label_width - 450, footer_y))
+
+
+    grid_size_label = font.render("Grid Size:", True, (0, 0, 0))
+    screen.blit(grid_size_label, (input_box.left - grid_size_label.get_width() - 10, footer_y))
 
     pygame.draw.rect(screen, (255, 255, 255), input_box)
     pygame.draw.rect(screen, (0, 0, 0), input_box, 2)
@@ -105,15 +136,16 @@ def draw_ui(screen, selected_shape, dropdown_open, input_box, apply_button, font
     pygame.draw.rect(screen, (0, 0, 0), apply_button, 2)
     screen.blit(font.render("Apply", True, (0, 0, 0)), (apply_button.x + 5, apply_button.y + 5))
 
-def select_target_shape(grid, screen, cell_size, input_box, apply_button, input_text, font):
+def select_target_shape(grid, screen, cell_size, input_box, apply_button, input_text, font, steps_counter):
     selected_shape = "Pyramid"
     target_shape = PREDEFINED_SHAPES[selected_shape]
     dropdown_open = False
+    global selected_topology, topology_dropdown_open
     limit_reached = False
     active_input = False
 
     draw_grid(screen, grid)
-    draw_ui(screen, selected_shape, dropdown_open, input_box, apply_button, font, input_text)
+    draw_ui(screen, selected_shape, dropdown_open, input_box, apply_button, font, input_text, selected_topology, topology_dropdown_open, steps_counter=steps_counter)
     pygame.display.flip()
 
     while True:
@@ -129,6 +161,18 @@ def select_target_shape(grid, screen, cell_size, input_box, apply_button, input_
                     active_input = True
                 else:
                     active_input = False
+
+                # Handle Topology Dropdown Toggle
+                if TOPOLOGY_DROPDOWN_X <= mx <= TOPOLOGY_DROPDOWN_X + TOPOLOGY_DROPDOWN_WIDTH and TOPOLOGY_DROPDOWN_Y <= my <= TOPOLOGY_DROPDOWN_Y + 30:
+                    topology_dropdown_open = not topology_dropdown_open
+                    event_occurred = True
+                elif topology_dropdown_open:
+                    for i, option in enumerate(topology_options):
+                        if TOPOLOGY_DROPDOWN_Y + 30 * (i + 1) <= my <= TOPOLOGY_DROPDOWN_Y + 30 * (i + 2):
+                            selected_topology = option
+                            topology_dropdown_open = False
+                            return ("TOPOLOGY", selected_topology.lower().replace(" ", "_"))
+
 
                 if BUTTON_X <= mx <= BUTTON_X + BUTTON_WIDTH and BUTTON_Y <= my <= BUTTON_Y + BUTTON_HEIGHT:
                     return "RESET"
@@ -173,7 +217,7 @@ def select_target_shape(grid, screen, cell_size, input_box, apply_button, input_
         if event_occurred:
             screen.fill((255, 255, 255))
             draw_grid(screen, grid)
-            draw_ui(screen, selected_shape, dropdown_open, input_box, apply_button, font, input_text)
+            draw_ui(screen, selected_shape, dropdown_open, input_box, apply_button, font, input_text, selected_topology, topology_dropdown_open, steps_counter=steps_counter)
             for row, col in target_shape:
                 pygame.draw.rect(screen, (200, 100, 0),
                                  (col * cell_size, row * cell_size + HEADER_HEIGHT, cell_size, cell_size), 3)

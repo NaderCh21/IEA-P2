@@ -17,8 +17,6 @@ Current Goal : Create Distributed Decision making
 
 """
 
-
-
 # Centralized Decision Making Greedy Assignment Algorithm 
 
 def greedy_assignment(grid, target_shape):
@@ -37,7 +35,7 @@ def greedy_assignment(grid, target_shape):
     distances = []
     for cell in current_cells:
         for tgt in target_shape:
-            path = astar_path(cell, tgt, grid)
+            path = astar_path(cell, tgt, grid, )
             if path:  # reachable
                 distances.append((len(path), cell, tgt))
     # Sort all possible pairs by distance (shortest first)
@@ -50,15 +48,6 @@ def greedy_assignment(grid, target_shape):
         assigned_cells.add(cell)
         assigned_targets.add(tgt)
     return assignments
-
-
-
-
-
-
-
-
-
 
 
 # Distributed Decsion Making Greedy Assignment Algorithm 
@@ -119,17 +108,7 @@ def stochastic_distributed_assignment(grid, target_shape, T=1.0):
     return assigns
 
 
-
-
-
-
-
-
-
-
-
-
-def move_elements_in_parallel(grid, target_shape, screen, assignment_mode, movement_mode):
+def move_elements_in_parallel(grid, target_shape, screen, assignment_mode, movement_mode, neighborhood_mode):
     """
     Moves the modules in the grid toward the target_shape in parallel, according to the 
     selected assignment algorithm and movement mode. Returns the total number of steps.
@@ -150,7 +129,7 @@ def move_elements_in_parallel(grid, target_shape, screen, assignment_mode, movem
 
         # Step 1: Compute assignments based on selected algorithm
         if assignment_mode == 'Hungarian':
-            assignments = optimal_assignment(grid, target_shape)
+            assignments = optimal_assignment(grid, target_shape,neighborhood_mode)
         elif assignment_mode == 'Distributed':  # Distributed Greedy Mode
             assignments = distributed_greedy_assignment(grid, target_shape)
         elif assignment_mode == 'Greedy': # Greedy mode
@@ -164,7 +143,7 @@ def move_elements_in_parallel(grid, target_shape, screen, assignment_mode, movem
         # Step 2: For each assignment, plan one step along a path to the target
         next_step = {}
         for (cell, tgt) in assignments:
-            path = astar_path(cell, tgt, grid)
+            path = astar_path(cell, tgt, grid, neighborhood_mode)
             if path and len(path) > 1:
                 next_step[cell] = path[1]  # next move toward target
 
@@ -255,7 +234,7 @@ def move_elements_in_parallel(grid, target_shape, screen, assignment_mode, movem
             for tgt in empty_targets:
                 if grid[tgt[0]][tgt[1]] == 1:
                     continue  # skip already filled target
-                path = astar_path(cell, tgt, grid)
+                path = astar_path(cell, tgt, grid, neighborhood_mode)
                 if path and len(path) > 1:
                     # Nudge one step toward this target
                     grid[cell[0]][cell[1]] = 0
